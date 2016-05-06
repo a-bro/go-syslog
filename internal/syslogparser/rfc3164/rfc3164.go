@@ -17,6 +17,7 @@ type Parser struct {
 	message  rfc3164message
 	location *time.Location
 	skipTag  bool
+	tsFmts   []string
 }
 
 type header struct {
@@ -29,12 +30,18 @@ type rfc3164message struct {
 	content string
 }
 
+var DefaultTSFormats = []string{
+	"Jan 02 15:04:05",
+	"Jan  2 15:04:05",
+}
+
 func NewParser(buff []byte) *Parser {
 	return &Parser{
 		buff:     buff,
 		cursor:   0,
 		l:        len(buff),
 		location: time.UTC,
+		tsFmts:   DefaultTSFormats,
 	}
 }
 
@@ -86,6 +93,10 @@ func (p *Parser) Dump() syslogparser.LogParts {
 		"facility":  p.priority.F.Value,
 		"severity":  p.priority.S.Value,
 	}
+}
+
+func (p *Parser) SetTimestampFormats(tsFmt []string) {
+	p.tsFmts = tsFmt
 }
 
 func (p *Parser) parsePriority() (syslogparser.Priority, error) {
@@ -141,13 +152,8 @@ func (p *Parser) parseTimestamp() (time.Time, error) {
 	var tsFmtLen int
 	var sub []byte
 
-	tsFmts := []string{
-		"Jan 02 15:04:05",
-		"Jan  2 15:04:05",
-	}
-
 	found := false
-	for _, tsFmt := range tsFmts {
+	for _, tsFmt := range p.tsFmts {
 		tsFmtLen = len(tsFmt)
 
 		if p.cursor+tsFmtLen > p.l {
