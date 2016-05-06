@@ -3,7 +3,7 @@ package format
 import (
 	"bufio"
 
-	"gopkg.in/mcuadros/go-syslog.v2/internal/syslogparser"
+	"github.com/a-bro/go-syslog/internal/syslogparser"
 )
 
 type Format interface {
