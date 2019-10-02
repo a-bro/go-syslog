@@ -139,6 +139,12 @@ func (s *Server) ListenTCPTLS(addr string, config *tls.Config) error {
 	return nil
 }
 
+//AddListener adds an existing http/new.Listener to the server
+func (s *Server) AddListener(listener net.Listener) {
+	s.doneTcp = make(chan bool)
+	s.listeners = append(s.listeners, listener)
+}
+
 //Starts the server, all the go routines goes to live
 func (s *Server) Boot() error {
 	if s.format == nil {
